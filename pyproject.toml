@@ -7,3 +7,8 @@ requires-python = ">=3.14,<3.15"
 dependencies = [
     "nautilus-trader>=1.231.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
