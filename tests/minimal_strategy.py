@@ -1,3 +1,8 @@
+"""Infrastructure smoke-test strategy for Phase 2 pipeline validation.
+
+This module is not a baseline trading strategy and must not be reused as one.
+"""
+
 from nautilus_trader.model.data import BarType
 from nautilus_trader.model.enums import OrderSide
 from nautilus_trader.model.objects import Quantity
@@ -6,7 +11,7 @@ from nautilus_trader.trading.strategy import Strategy
 
 
 class MinimalStrategyConfig(StrategyConfig):
-    bar_type: str = "AAPL.XNAS-1-MINUTE-LAST-EXTERNAL"
+    bar_type: str
 
 
 class MinimalStrategy(Strategy):

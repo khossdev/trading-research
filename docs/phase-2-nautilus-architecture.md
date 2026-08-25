@@ -153,7 +153,9 @@ All 3 tests passed.
 
 The smoke-test strategy submits a single market order on the first bar. It is not a baseline trading strategy. No trading hypothesis has been evaluated yet.
 
-During validation, we also found that the earlier backtest test only called `node.run()` without checking the result. The pipeline was failing silently because of incorrect import paths and missing instrument/subscription setup. The test now asserts meaningful outcomes.
+During validation, we also found that the earlier backtest test only called `node.run()` without checking the result. The pipeline was failing silently because of incorrect import paths and missing instrument/subscription setup. The test now asserts that bars are processed, an order is submitted and closed, and a position is opened.
+
+Phase 2 infrastructure and minimal backtest plumbing are validated. No trading hypothesis has been evaluated yet, and Phase 3 has not started.
 
 Current limitations:
 
@@ -238,6 +240,8 @@ Phase 2 is complete when we can explain:
 - the difference between backtest, sandbox, and live environments;
 - why a backtest does not guarantee future profitability.
 
-Phase 2 is also complete when the environment tests above pass and the results are recorded.
+Phase 2 is also complete when the environment tests above pass, execution flow is validated, and the results are recorded.
+
+Infrastructure validation confirms that bars reach a strategy, an order can be submitted, and simulated execution can fill that order. This does not mean trading research has started.
 
 The next phase is to implement and document a first baseline strategy with a clear, testable trading hypothesis.

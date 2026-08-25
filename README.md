@@ -2,7 +2,7 @@
 
 Research and experimentation in algorithmic trading, quantitative strategies, backtesting, and risk management.
 
-> **Status:** Phase 2 — NautilusTrader environment
+> **Status:** Phase 2 — NautilusTrader environment (infrastructure validated)
 
 ## Purpose
 
@@ -26,7 +26,7 @@ The project starts with no real-money trading. Strategies must be researched, te
 
 - [x] Phase 0 — Foundation and research scope
 - [x] Phase 1 — Trading and market basics
-- [x] Phase 2 — NautilusTrader environment
+- [x] Phase 2 — NautilusTrader environment (infrastructure validated)
 - [ ] Phase 3 — First baseline strategy
 - [ ] Phase 4 — Backtesting
 - [ ] Phase 5 — Trading costs and execution realism

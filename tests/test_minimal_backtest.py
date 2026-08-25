@@ -70,7 +70,7 @@ def test_minimal_backtest(tmp_path: Path) -> None:
     strategy = ImportableStrategyConfig(
         strategy_path="tests.minimal_strategy:MinimalStrategy",
         config_path="tests.minimal_strategy:MinimalStrategyConfig",
-        config={},
+        config={"bar_type": "AAPL.XNAS-1-MINUTE-LAST-EXTERNAL"},
     )
 
     venue = BacktestVenueConfig(
@@ -96,13 +96,27 @@ def test_minimal_backtest(tmp_path: Path) -> None:
         ],
         engine=engine,
         raise_exception=True,
+        dispose_on_completion=False,
     )
 
     node = BacktestNode([run_config])
-    results = node.run()
+    try:
+        results = node.run()
 
-    assert len(results) == 1
-    result = results[0]
-    assert result.iterations >= 2
-    assert result.total_events >= 2
-    assert result.stats_pnls["USD"]["PnL (total)"] != 0.0
+        assert len(results) == 1
+        result = results[0]
+        assert result.iterations >= 2
+        assert result.total_events >= 2
+        assert result.total_orders >= 1
+        assert result.total_positions >= 1
+        assert int(result.summary["orders.closed"]) >= 1
+
+        engine = node.get_engine(run_config.id)
+        orders = engine.cache.orders()
+        positions = engine.cache.positions()
+
+        assert len(orders) >= 1
+        assert any(order.is_closed for order in orders)
+        assert len(positions) >= 1
+    finally:
+        node.dispose()
