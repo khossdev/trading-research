@@ -2,7 +2,7 @@
 
 Research and experimentation in algorithmic trading, quantitative strategies, backtesting, and risk management.
 
-> **Status:** Phase 4 — Backtesting
+> **Status:** Phase 3 complete — Baseline strategy
 
 ## Purpose
 
