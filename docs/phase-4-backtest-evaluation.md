@@ -8,70 +8,54 @@ This phase does not attempt to optimize parameters or claim a trading edge. It e
 
 ## Research question
 
-Given a completed NautilusTrader backtest of `BaselineStrategy`, can we compute reproducible trading metrics (trades, P&L, win rate, expectancy, and later drawdown) from the resulting fills?
+Given a completed NautilusTrader backtest of `BaselineStrategy`, can we compute reproducible trading metrics (trades, P&L, win rate, expectancy, and drawdown) from the resulting fills?
 
 This phase does not attempt to answer whether a profitable strategy exists. It establishes a measurement layer that can later support comparison and robustness work.
 
-## Planned approach
+## What we learned
 
-The work is layered, in the same spirit as Phase 3:
+### Layered construction
+
+Evaluation was built in the same incremental style as Phase 3:
 
 ```text
-BaselineStrategy
-      ↓
-Backtest
-      ↓
-Trades
-      ↓
-Metrics
-      ↓
-P&L / Win Rate / Expectancy / Drawdown
-      ↓
-Evaluation
+Trade
+  ↓
+Metrics (unit-tested on synthetic trades)
+  ↓
+Position → Trade bridge
+  ↓
+Real baseline backtest
+  ↓
+EvaluationReport
 ```
 
-Incremental milestones:
+Each layer has dedicated tests. Metrics are validated independently before NautilusTrader wiring.
 
-1. Define metrics and document assumptions.
-2. Implement a small metrics module.
-3. Unit-test metrics on synthetic trades with known answers.
-4. Connect metrics to the real baseline backtest.
-5. Record and interpret results without claiming an edge.
+### Metrics module
 
-## Metrics
+`tests/backtest_metrics.py` defines:
 
-### Initial set
+- `Trade` with P&L from `(exit_price - entry_price) × quantity`
+- aggregate metrics: `trade_count`, `total_pnl`, `win_count`, `loss_count`, `win_rate`, `average_win`, `average_loss`, `expectancy`, `max_drawdown`
+- `EvaluationReport` via `evaluate_trades(trades)`
+- `position_to_trade(position)` and `trades_from_closed_positions(positions)`
 
-| Metric | Meaning |
-|--------|---------|
-| `trade_count` | Number of completed round-trip trades |
-| `total_pnl` | Sum of realized P&L across completed trades |
-| `win_count` | Number of trades with positive P&L |
-| `loss_count` | Number of trades with negative P&L |
-| `win_rate` | `win_count / trade_count` when `trade_count > 0` |
-| `average_win` | Mean P&L of winning trades (positive) |
-| `average_loss` | Mean P&L of losing trades (**negative**) |
-| `expectancy` | Expected P&L per trade: `win_rate * average_win + (1 - win_rate) * average_loss` |
+Signed conventions:
 
-### Later additions
+- `average_win` is positive
+- `average_loss` is negative
+- `expectancy = win_rate × average_win + (1 - win_rate) × average_loss`
+- `max_drawdown` is the largest peak-to-trough decline on the cumulative realized P&L curve (reported as a positive magnitude)
 
-| Metric | Meaning |
-|--------|---------|
-| `max_drawdown` | Largest peak-to-trough decline on the equity curve from realized P&L |
-| `profit_factor` | Gross profits divided by gross losses (when losses are non-zero) |
-
-### Definitions used in this phase
+Definitions used in this phase:
 
 - A **trade** is a completed round trip: entry fill(s) closed by exit fill(s). For the long-only baseline, that means BUY then SELL.
 - **P&L** for a trade is computed from fill prices and quantity, before modeling fees, spread, or slippage in detail.
 - A **win** is a trade with P&L `> 0`.
 - A **loss** is a trade with P&L `< 0`.
 - A trade with P&L `== 0` is neither a win nor a loss; it still counts in `trade_count`.
-- `average_win` is the mean of winning trade P&Ls and is positive.
-- `average_loss` is the mean of losing trade P&Ls and is **negative** (not an absolute value).
-- `expectancy` uses those signed values directly:
-  `win_rate * average_win + (1 - win_rate) * average_loss`.
-- Metrics are undefined or explicitly guarded when there are zero trades (no division by zero).
+- Metrics are guarded when there are zero trades (no division by zero).
 
 Example with two trades (`+100`, `-50`):
 
@@ -80,24 +64,93 @@ win_rate     = 0.5
 average_win  = +100
 average_loss = -50
 expectancy   = 0.5 × 100 + 0.5 × (-50) = +25
+max_drawdown = 50
 ```
 
-Exact formulas will be locked by unit tests on synthetic trades before any NautilusTrader wiring.
+`profit_factor` is deferred to later work.
 
-## Reference scenario
+### NautilusTrader bridge
 
-Reuse the Phase 3 synthetic integration backtest as the first real connection point:
+Closed positions expose:
+
+- `avg_px_open`
+- `avg_px_close`
+- `peak_qty` (not `quantity`, which is `0` after a position closes)
+
+The bridge converts closed positions into `Trade` objects without modifying `BaselineStrategy`.
+
+### Integration backtest
+
+`tests/test_baseline_backtest.py` reuses the Phase 3 pipeline and adds evaluation assertions:
+
+1. Run the baseline backtest on synthetic catalog data.
+2. Read closed positions from `engine.cache.positions()`.
+3. Convert them to `Trade` objects.
+4. Build an `EvaluationReport` with `evaluate_trades()`.
+
+Synthetic closes with `short_window=2` and `long_window=3`:
 
 ```text
-closes: 100, 100, 100, 110, 110, 90
-windows: short=2, long=3
-               ↑         ↑
-              BUY       SELL
+100, 100, 100, 110, 110, 90
+                 ↑         ↑
+                BUY       SELL
 ```
 
-Phase 3 already proved that this scenario produces real BUY and SELL fills and ends flat. Phase 4 asks what metrics that single completed trade produces.
+Measured outcome:
 
-This remains infrastructure-plus-measurement evidence on synthetic data, not evidence of strategy quality.
+| Metric | Value |
+|--------|------:|
+| `trade_count` | 1 |
+| `total_pnl` | -20 |
+| `win_count` | 0 |
+| `loss_count` | 1 |
+| `win_rate` | 0.0 |
+| `average_win` | 0.0 |
+| `average_loss` | -20.0 |
+| `expectancy` | -20.0 |
+| `max_drawdown` | 20.0 |
+
+Trade detail: entry `110` → exit `90` × `1` → P&L `-20`.
+
+The backtest confirms:
+
+- Phase 3 execution assertions still pass;
+- one completed round-trip trade is measured;
+- the evaluation report matches the expected synthetic loss.
+
+### Validation
+
+Command:
+
+```bash
+uv run pytest -v
+```
+
+Result on 2026-08-27:
+
+| Area | Tests | Status |
+|------|-------|--------|
+| Phase 2 environment / catalog / minimal backtest | 3 | passed |
+| Baseline config | 7 | passed |
+| SMA | 1 | passed |
+| Crossover | 4 | passed |
+| Signal / position | 6 | passed |
+| Order submission (mocked factory layer) | 5 | passed |
+| Metrics unit tests | 25 | passed |
+| Baseline backtest evaluation | 1 | passed |
+
+All 52 tests passed.
+
+A negative P&L on this scenario validates the measurement pipeline, not strategy quality.
+
+Current limitations:
+
+- tests use synthetic bars and a single forced BUY/SELL cycle, not real market data;
+- only one completed trade is measured in the reference scenario;
+- transaction costs, spread, and slippage are not yet modeled in detail;
+- `profit_factor`, Sharpe, and other advanced statistics are not computed yet;
+- no parameter search or out-of-sample validation has been performed;
+- a profitable or unprofitable result on synthetic data must not be interpreted as strategy evidence.
 
 ## Research principles established
 
@@ -105,9 +158,11 @@ Measurement must be defined and tested independently of the strategy and the eng
 
 A metric module that fails on known synthetic trades is not ready to interpret a backtest.
 
-A positive P&L on synthetic data does not imply an edge. It only shows that measurement and execution are consistent for that scenario.
+A positive or negative P&L on synthetic data does not imply an edge. It only shows that measurement and execution are consistent for that scenario.
 
 No parameter search belongs in this phase. Correct measurement comes before optimization.
+
+Reporting must stay separate from interpretation: metrics describe what happened; conclusions about edge require later phases.
 
 ## What we are not doing
 
@@ -168,8 +223,8 @@ Phase 4 is complete when:
 - metrics are defined and documented;
 - a metrics module computes the initial set from trade results;
 - unit tests cover known synthetic trade outcomes;
-- the baseline backtest can report at least trade count, P&L, win rate, and expectancy;
+- the baseline backtest can report trade count, P&L, win rate, expectancy, and max drawdown;
 - limitations are recorded;
 - no claim of trading edge is made from synthetic results alone.
 
-The next phase after evaluation is trading costs and execution realism: measure performance under more realistic fee, spread, and slippage assumptions.
+The next phase is trading costs and execution realism: measure performance under more realistic fee, spread, and slippage assumptions.
