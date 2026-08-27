@@ -15,6 +15,18 @@ from nautilus_trader.model.objects import Currency, Price, Quantity
 from nautilus_trader.persistence.catalog import ParquetDataCatalog
 from nautilus_trader.trading.config import ImportableStrategyConfig
 
+from tests.backtest_metrics import (
+    average_loss,
+    average_win,
+    expectancy,
+    loss_count,
+    position_to_trade,
+    total_pnl,
+    trade_count,
+    win_count,
+    win_rate,
+)
+
 BAR_TYPE = "AAPL.XNAS-1-MINUTE-LAST-EXTERNAL"
 MINUTE_NS = 60_000_000_000
 
@@ -134,5 +146,17 @@ def test_baseline_backtest_buy_then_sell(tmp_path: Path) -> None:
         assert len(positions) >= 1
         assert all(position.is_closed for position in positions)
         assert engine.cache.positions_open() == []
+
+        closed_positions = [position for position in positions if position.is_closed]
+        trades = [position_to_trade(position) for position in closed_positions]
+
+        assert trade_count(trades) == 1
+        assert total_pnl(trades) == -20
+        assert win_count(trades) == 0
+        assert loss_count(trades) == 1
+        assert win_rate(trades) == 0.0
+        assert average_win(trades) == 0.0
+        assert average_loss(trades) == -20.0
+        assert expectancy(trades) == -20.0
     finally:
         node.dispose()
