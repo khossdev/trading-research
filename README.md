@@ -44,6 +44,7 @@ The project starts with no real-money trading. Strategies must be researched, te
 - [Phase 2 — NautilusTrader Architecture](docs/phase-2-nautilus-architecture.md)
 - [Phase 3 — First Baseline Strategy](docs/phase-3-baseline-strategy.md)
 - [Phase 4 — Backtest Evaluation](docs/phase-4-backtest-evaluation.md)
+- [Phase 4 — Results](docs/phase-4-results.md)
 
 ## Disclaimer
 

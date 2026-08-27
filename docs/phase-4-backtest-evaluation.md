@@ -112,6 +112,8 @@ Measured outcome:
 
 Trade detail: entry `110` → exit `90` × `1` → P&L `-20`.
 
+Recorded results: [Phase 4 Results](phase-4-results.md).
+
 The backtest confirms:
 
 - Phase 3 execution assertions still pass;
