@@ -62,3 +62,47 @@ def average_loss(trades: Sequence[Trade]) -> float:
 def expectancy(trades: Sequence[Trade]) -> float:
     rate = win_rate(trades)
     return rate * average_win(trades) + (1 - rate) * average_loss(trades)
+
+
+def max_drawdown(trades: Sequence[Trade]) -> float:
+    peak = 0.0
+    equity = 0.0
+    largest_decline = 0.0
+
+    for trade in trades:
+        equity += trade.pnl
+        peak = max(peak, equity)
+        largest_decline = max(largest_decline, peak - equity)
+
+    return largest_decline
+
+
+@dataclass(frozen=True)
+class EvaluationReport:
+    trade_count: int
+    total_pnl: float
+    win_count: int
+    loss_count: int
+    win_rate: float
+    average_win: float
+    average_loss: float
+    expectancy: float
+    max_drawdown: float
+
+
+def evaluate_trades(trades: Sequence[Trade]) -> EvaluationReport:
+    return EvaluationReport(
+        trade_count=trade_count(trades),
+        total_pnl=total_pnl(trades),
+        win_count=win_count(trades),
+        loss_count=loss_count(trades),
+        win_rate=win_rate(trades),
+        average_win=average_win(trades),
+        average_loss=average_loss(trades),
+        expectancy=expectancy(trades),
+        max_drawdown=max_drawdown(trades),
+    )
+
+
+def trades_from_closed_positions(positions: Sequence[Any]) -> list[Trade]:
+    return [position_to_trade(position) for position in positions if position.is_closed]

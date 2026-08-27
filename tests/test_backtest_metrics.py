@@ -3,10 +3,13 @@ from unittest.mock import MagicMock
 
 from tests.backtest_metrics import (
     Trade,
+    EvaluationReport,
     average_loss,
     average_win,
+    evaluate_trades,
     expectancy,
     loss_count,
+    max_drawdown,
     position_to_trade,
     total_pnl,
     trade_count,
@@ -191,3 +194,40 @@ def test_position_to_trade_losing() -> None:
     assert trade.exit_price == 105.0
     assert trade.quantity == 2.0
     assert trade.pnl == -10.0
+
+
+def test_max_drawdown_empty() -> None:
+    assert max_drawdown([]) == 0.0
+
+
+def test_max_drawdown_single_loss() -> None:
+    trades = [Trade(entry_price=110, exit_price=90, quantity=1)]
+
+    assert max_drawdown(trades) == 20.0
+
+
+def test_max_drawdown_mixed() -> None:
+    trades = [
+        Trade(entry_price=100, exit_price=110, quantity=10),  # +100
+        Trade(entry_price=110, exit_price=105, quantity=10),  # -50
+    ]
+
+    assert max_drawdown(trades) == 50.0
+
+
+def test_evaluate_trades_reference_scenario() -> None:
+    trades = [Trade(entry_price=110, exit_price=90, quantity=1)]
+
+    report = evaluate_trades(trades)
+
+    assert report == EvaluationReport(
+        trade_count=1,
+        total_pnl=-20.0,
+        win_count=0,
+        loss_count=1,
+        win_rate=0.0,
+        average_win=0.0,
+        average_loss=-20.0,
+        expectancy=-20.0,
+        max_drawdown=20.0,
+    )
