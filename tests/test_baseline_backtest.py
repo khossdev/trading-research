@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from nautilus_trader.backtest.config import (
     BacktestDataConfig,
     BacktestEngineConfig,
@@ -15,7 +17,16 @@ from nautilus_trader.model.objects import Currency, Price, Quantity
 from nautilus_trader.persistence.catalog import ParquetDataCatalog
 from nautilus_trader.trading.config import ImportableStrategyConfig
 
-from tests.backtest_metrics import evaluate_trades, trades_from_closed_positions
+from tests.backtest_metrics import (
+    evaluate_trades,
+    total_pnl,
+    trades_from_closed_positions,
+)
+from tests.execution_costs import (
+    ExecutionCostConfig,
+    evaluate_trades as evaluate_trades_with_costs,
+    net_pnl,
+)
 
 BAR_TYPE = "AAPL.XNAS-1-MINUTE-LAST-EXTERNAL"
 MINUTE_NS = 60_000_000_000
@@ -150,5 +161,48 @@ def test_baseline_backtest_buy_then_sell(tmp_path: Path) -> None:
         assert report.average_loss == -20.0
         assert report.expectancy == -20.0
         assert report.max_drawdown == 20.0
+
+        cost_config = ExecutionCostConfig(
+            fee_rate=0.0,
+            spread=0.0,
+            slippage=0.0,
+        )
+
+        gross_pnl = total_pnl(trades)
+        net_pnl_value = sum(
+            net_pnl(trade, cost_config)
+            for trade in trades
+        )
+
+        assert gross_pnl == -20.0
+        assert net_pnl_value == -20.0
+
+        cost_config = ExecutionCostConfig(
+            fee_rate=0.001,
+            spread=2.0,
+            slippage=1.0,
+        )
+
+        net_pnl_with_costs = sum(
+            net_pnl(trade, cost_config)
+            for trade in trades
+        )
+
+        assert net_pnl_with_costs == pytest.approx(-24.2)
+
+        net_report = evaluate_trades_with_costs(trades, cost_config)
+
+        assert net_report.trade_count == 1
+        assert net_report.gross_pnl == pytest.approx(-20.0)
+        assert net_report.net_pnl == pytest.approx(-24.2)
+        assert net_report.fees == pytest.approx(0.2)
+        assert net_report.spread_cost == pytest.approx(2.0)
+        assert net_report.slippage_cost == pytest.approx(2.0)
+        assert net_report.win_count == 0
+        assert net_report.loss_count == 1
+        assert net_report.win_rate == 0.0
+        assert net_report.average_win == 0.0
+        assert net_report.average_loss == pytest.approx(-24.2)
+        assert net_report.expectancy == pytest.approx(-24.2)
     finally:
         node.dispose()
