@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-from tests.backtest_metrics import Trade
+from trading_research.evaluation.metrics import Trade
 
 
 @dataclass(frozen=True)
@@ -20,7 +20,7 @@ class ExecutionCostConfig:
 
 
 @dataclass(frozen=True)
-class EvaluationReport:
+class NetEvaluationReport:
     trade_count: int
     gross_pnl: float
     net_pnl: float
@@ -86,10 +86,10 @@ def net_pnl(
     return gross - trade_fees(trade, config)
 
 
-def evaluate_trades(
+def evaluate_net(
     trades: Sequence[Trade],
     config: ExecutionCostConfig,
-) -> EvaluationReport:
+) -> NetEvaluationReport:
     count = len(trades)
     gross_pnl = sum(trade.pnl for trade in trades)
     net_pnls = [net_pnl(trade, config) for trade in trades]
@@ -107,7 +107,7 @@ def evaluate_trades(
     average_loss = sum(losses) / loss_count if loss_count else 0.0
     expectancy = win_rate * average_win + (1 - win_rate) * average_loss
 
-    return EvaluationReport(
+    return NetEvaluationReport(
         trade_count=count,
         gross_pnl=gross_pnl,
         net_pnl=net_pnl_total,

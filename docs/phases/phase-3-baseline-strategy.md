@@ -74,7 +74,7 @@ Unit tests of order intent mock `_submit_market_order` because `order_factory` i
 
 ### Integration backtest
 
-`tests/test_baseline_backtest.py` reuses the Phase 2 pipeline:
+`tests/integration/test_baseline_backtest.py` reuses the Phase 2 pipeline:
 
 1. Write instrument and synthetic bars to a Parquet catalog.
 2. Load `BaselineStrategy` through `ImportableStrategyConfig`.

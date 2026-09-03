@@ -78,7 +78,7 @@ def max_drawdown(trades: Sequence[Trade]) -> float:
 
 
 @dataclass(frozen=True)
-class EvaluationReport:
+class GrossEvaluationReport:
     trade_count: int
     total_pnl: float
     win_count: int
@@ -90,8 +90,8 @@ class EvaluationReport:
     max_drawdown: float
 
 
-def evaluate_trades(trades: Sequence[Trade]) -> EvaluationReport:
-    return EvaluationReport(
+def evaluate_gross(trades: Sequence[Trade]) -> GrossEvaluationReport:
+    return GrossEvaluationReport(
         trade_count=trade_count(trades),
         total_pnl=total_pnl(trades),
         win_count=win_count(trades),

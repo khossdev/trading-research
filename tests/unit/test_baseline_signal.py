@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from tests.baseline_strategy import BaselineStrategy, BaselineStrategyConfig
+from trading_research.strategies.baseline import BaselineStrategy, BaselineStrategyConfig
 
 
 def make_strategy() -> BaselineStrategy:

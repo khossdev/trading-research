@@ -39,14 +39,12 @@ The project starts with no real-money trading. Strategies must be researched, te
 
 ## Phase docs
 
-- [Phase 0 — Foundation](docs/phase-0-foundation.md)
-- [Phase 1 — Trading & Market Basics](docs/phase-1-trading-basics.md)
-- [Phase 2 — NautilusTrader Architecture](docs/phase-2-nautilus-architecture.md)
-- [Phase 3 — First Baseline Strategy](docs/phase-3-baseline-strategy.md)
-- [Phase 4 — Backtest Evaluation](docs/phase-4-backtest-evaluation.md)
-- [Phase 4 — Results](docs/phase-4-results.md)
-- [Phase 5 — Trading Costs](docs/phase-5-trading-costs.md)
-- [Phase 5 — Results](docs/phase-5-results.md)
+- [Phase 0 — Foundation](docs/phases/phase-0-foundation.md)
+- [Phase 1 — Trading & Market Basics](docs/phases/phase-1-trading-basics.md)
+- [Phase 2 — NautilusTrader Architecture](docs/phases/phase-2-nautilus-architecture.md)
+- [Phase 3 — First Baseline Strategy](docs/phases/phase-3-baseline-strategy.md)
+- [Phase 4 — Backtest Evaluation](docs/phases/phase-4-backtest-evaluation.md)
+- [Phase 5 — Trading Costs](docs/phases/phase-5-trading-costs.md)
 
 ## Disclaimer
 

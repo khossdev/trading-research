@@ -124,7 +124,7 @@ The project currently has:
 - a basic NautilusTrader environment test (`tests/test_nautilus_environment.py`);
 - a Parquet data catalog for bar storage (`tests/test_catalog.py`);
 - a minimal backtest pipeline with assertions (`tests/test_minimal_backtest.py`);
-- a smoke-test strategy that validates the pipeline end to end (`tests/minimal_strategy.py`).
+- a smoke-test strategy that validates the pipeline end to end (`tests/fixtures/minimal_strategy.py`).
 
 Through the smallest useful experiments, we confirmed that:
 

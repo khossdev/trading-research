@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 from nautilus_trader.model.enums import OrderSide
 
-from tests.baseline_strategy import BaselineStrategy, BaselineStrategyConfig
+from trading_research.strategies.baseline import BaselineStrategy, BaselineStrategyConfig
 
 
 def make_strategy() -> BaselineStrategy:

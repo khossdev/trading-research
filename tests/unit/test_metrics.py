@@ -1,12 +1,12 @@
 import pytest
 from unittest.mock import MagicMock
 
-from tests.backtest_metrics import (
+from trading_research.evaluation.metrics import (
     Trade,
-    EvaluationReport,
+    GrossEvaluationReport,
     average_loss,
     average_win,
-    evaluate_trades,
+    evaluate_gross,
     expectancy,
     loss_count,
     max_drawdown,
@@ -215,12 +215,12 @@ def test_max_drawdown_mixed() -> None:
     assert max_drawdown(trades) == 50.0
 
 
-def test_evaluate_trades_reference_scenario() -> None:
+def test_evaluate_gross_reference_scenario() -> None:
     trades = [Trade(entry_price=110, exit_price=90, quantity=1)]
 
-    report = evaluate_trades(trades)
+    report = evaluate_gross(trades)
 
-    assert report == EvaluationReport(
+    assert report == GrossEvaluationReport(
         trade_count=1,
         total_pnl=-20.0,
         win_count=0,
