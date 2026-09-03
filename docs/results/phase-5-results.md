@@ -10,7 +10,7 @@ It does not claim strategy success or failure. The objective was to validate the
 
 Same synthetic backtest as Phase 4, validated end-to-end through NautilusTrader:
 
-- Synthetic bars from `tests/test_baseline_backtest.py`
+- Synthetic bars from `tests/integration/test_baseline_backtest.py`
 - Instrument: `AAPL.XNAS`
 - Bar type: `AAPL.XNAS-1-MINUTE-LAST-EXTERNAL`
 - `short_window`: 2

@@ -121,9 +121,9 @@ The project currently has:
 - `uv` dependency management;
 - NautilusTrader 1.231.0;
 - pytest;
-- a basic NautilusTrader environment test (`tests/test_nautilus_environment.py`);
-- a Parquet data catalog for bar storage (`tests/test_catalog.py`);
-- a minimal backtest pipeline with assertions (`tests/test_minimal_backtest.py`);
+- a basic NautilusTrader environment test (`tests/integration/test_nautilus_environment.py`);
+- a Parquet data catalog for bar storage (`tests/integration/test_catalog.py`);
+- a minimal backtest pipeline with assertions (`tests/integration/test_minimal_backtest.py`);
 - a smoke-test strategy that validates the pipeline end to end (`tests/fixtures/minimal_strategy.py`).
 
 Through the smallest useful experiments, we confirmed that:
