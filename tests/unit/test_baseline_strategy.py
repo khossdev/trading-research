@@ -1,6 +1,6 @@
 import pytest
 
-from tests.baseline_strategy import BaselineStrategyConfig
+from trading_research.strategies.baseline import BaselineStrategyConfig
 
 
 def test_baseline_strategy_config_defaults() -> None:

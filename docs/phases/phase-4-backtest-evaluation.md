@@ -27,18 +27,18 @@ Position → Trade bridge
   ↓
 Real baseline backtest
   ↓
-EvaluationReport
+GrossEvaluationReport
 ```
 
 Each layer has dedicated tests. Metrics are validated independently before NautilusTrader wiring.
 
 ### Metrics module
 
-`tests/backtest_metrics.py` defines:
+`src/trading_research/evaluation/metrics.py` defines:
 
 - `Trade` with P&L from `(exit_price - entry_price) × quantity`
 - aggregate metrics: `trade_count`, `total_pnl`, `win_count`, `loss_count`, `win_rate`, `average_win`, `average_loss`, `expectancy`, `max_drawdown`
-- `EvaluationReport` via `evaluate_trades(trades)`
+- `GrossEvaluationReport` via `evaluate_gross(trades)`
 - `position_to_trade(position)` and `trades_from_closed_positions(positions)`
 
 Signed conventions:
@@ -81,12 +81,12 @@ The bridge converts closed positions into `Trade` objects without modifying `Bas
 
 ### Integration backtest
 
-`tests/test_baseline_backtest.py` reuses the Phase 3 pipeline and adds evaluation assertions:
+`tests/integration/test_baseline_backtest.py` reuses the Phase 3 pipeline and adds evaluation assertions:
 
 1. Run the baseline backtest on synthetic catalog data.
 2. Read closed positions from `engine.cache.positions()`.
 3. Convert them to `Trade` objects.
-4. Build an `EvaluationReport` with `evaluate_trades()`.
+4. Build a `GrossEvaluationReport` with `evaluate_gross()`.
 
 Synthetic closes with `short_window=2` and `long_window=3`:
 
@@ -112,7 +112,7 @@ Measured outcome:
 
 Trade detail: entry `110` → exit `90` × `1` → P&L `-20`.
 
-Recorded results: [Phase 4 Results](phase-4-results.md).
+Recorded results: [Phase 4 Results](../results/phase-4-results.md).
 
 The backtest confirms:
 

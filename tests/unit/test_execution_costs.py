@@ -1,11 +1,11 @@
 import pytest
 
-from tests.backtest_metrics import Trade
-from tests.execution_costs import (
-    EvaluationReport,
+from trading_research.evaluation.metrics import Trade
+from trading_research.execution.costs import (
     ExecutionCostConfig,
+    NetEvaluationReport,
     calculate_fee,
-    evaluate_trades,
+    evaluate_net,
     net_pnl,
 )
 
@@ -109,7 +109,7 @@ def test_net_pnl_with_fees_spread_and_slippage() -> None:
     assert net_pnl(trade, config) == pytest.approx(57.9)
 
 
-def test_evaluate_trades_without_costs() -> None:
+def test_evaluate_net_without_costs() -> None:
     trades = [Trade(entry_price=100, exit_price=110, quantity=10)]
     config = ExecutionCostConfig(
         fee_rate=0.0,
@@ -117,9 +117,9 @@ def test_evaluate_trades_without_costs() -> None:
         slippage=0.0,
     )
 
-    report = evaluate_trades(trades, config)
+    report = evaluate_net(trades, config)
 
-    assert report == EvaluationReport(
+    assert report == NetEvaluationReport(
         trade_count=1,
         gross_pnl=100.0,
         net_pnl=100.0,
@@ -135,7 +135,7 @@ def test_evaluate_trades_without_costs() -> None:
     )
 
 
-def test_evaluate_trades_with_fees_spread_and_slippage() -> None:
+def test_evaluate_net_with_fees_spread_and_slippage() -> None:
     trades = [Trade(entry_price=100, exit_price=110, quantity=10)]
     config = ExecutionCostConfig(
         fee_rate=0.001,
@@ -143,7 +143,7 @@ def test_evaluate_trades_with_fees_spread_and_slippage() -> None:
         slippage=1.0,
     )
 
-    report = evaluate_trades(trades, config)
+    report = evaluate_net(trades, config)
 
     assert report.trade_count == 1
     assert report.gross_pnl == pytest.approx(100.0)

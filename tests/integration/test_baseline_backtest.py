@@ -17,14 +17,14 @@ from nautilus_trader.model.objects import Currency, Price, Quantity
 from nautilus_trader.persistence.catalog import ParquetDataCatalog
 from nautilus_trader.trading.config import ImportableStrategyConfig
 
-from tests.backtest_metrics import (
-    evaluate_trades,
+from trading_research.evaluation.metrics import (
+    evaluate_gross,
     total_pnl,
     trades_from_closed_positions,
 )
-from tests.execution_costs import (
+from trading_research.execution.costs import (
     ExecutionCostConfig,
-    evaluate_trades as evaluate_trades_with_costs,
+    evaluate_net,
     net_pnl,
 )
 
@@ -85,8 +85,8 @@ def test_baseline_backtest_buy_then_sell(tmp_path: Path) -> None:
     instrument_id = InstrumentId.from_str("AAPL.XNAS")
 
     strategy = ImportableStrategyConfig(
-        strategy_path="tests.baseline_strategy:BaselineStrategy",
-        config_path="tests.baseline_strategy:BaselineStrategyConfig",
+        strategy_path="trading_research.strategies.baseline:BaselineStrategy",
+        config_path="trading_research.strategies.baseline:BaselineStrategyConfig",
         config={
             "instrument_id": "AAPL.XNAS",
             "bar_type": BAR_TYPE,
@@ -150,7 +150,7 @@ def test_baseline_backtest_buy_then_sell(tmp_path: Path) -> None:
 
         closed_positions = [position for position in positions if position.is_closed]
         trades = trades_from_closed_positions(closed_positions)
-        report = evaluate_trades(trades)
+        report = evaluate_gross(trades)
 
         assert report.trade_count == 1
         assert report.total_pnl == -20
@@ -190,7 +190,7 @@ def test_baseline_backtest_buy_then_sell(tmp_path: Path) -> None:
 
         assert net_pnl_with_costs == pytest.approx(-24.2)
 
-        net_report = evaluate_trades_with_costs(trades, cost_config)
+        net_report = evaluate_net(trades, cost_config)
 
         assert net_report.trade_count == 1
         assert net_report.gross_pnl == pytest.approx(-20.0)

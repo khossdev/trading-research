@@ -10,7 +10,7 @@ It does not claim strategy success or failure. The objective was to validate the
 
 Same synthetic backtest as Phase 4, validated end-to-end through NautilusTrader:
 
-- Synthetic bars from `tests/test_baseline_backtest.py`
+- Synthetic bars from `tests/integration/test_baseline_backtest.py`
 - Instrument: `AAPL.XNAS`
 - Bar type: `AAPL.XNAS-1-MINUTE-LAST-EXTERNAL`
 - `short_window`: 2
@@ -48,9 +48,9 @@ position_to_trade()
       ↓
 Trade (110 → 90 × 1)
       ↓
-evaluate_trades(config)
+evaluate_net(config)
       ↓
-EvaluationReport
+NetEvaluationReport
 ```
 
 ## Result
@@ -103,7 +103,7 @@ SELL = 90  - spread/2 - slippage = 88
 Reproduce with:
 
 ```bash
-uv run pytest tests/test_baseline_backtest.py -v
+uv run pytest tests/integration/test_baseline_backtest.py -v
 ```
 
 Full suite:
@@ -145,7 +145,7 @@ Additional scope limits:
 
 - one synthetic scenario with a single completed trade;
 - `BaselineStrategy` was not modified; costs are applied after the backtest;
-- gross evaluation (`backtest_metrics.evaluate_trades`) and net evaluation (`execution_costs.evaluate_trades`) remain separate layers;
+- gross evaluation (`evaluate_gross`) and net evaluation (`evaluate_net`) remain separate layers;
 - no parameter search or out-of-sample validation was performed.
 
 ## What Phase 5 allows us to conclude

@@ -8,7 +8,7 @@ It does not claim strategy success or failure. The objective was to validate mea
 
 ## Scenario
 
-- Synthetic bars from `tests/test_baseline_backtest.py`
+- Synthetic bars from `tests/integration/test_baseline_backtest.py`
 - Instrument: `AAPL.XNAS`
 - Bar type: `AAPL.XNAS-1-MINUTE-LAST-EXTERNAL`
 - `short_window`: 2
@@ -46,7 +46,7 @@ Execution detail:
 Reproduce with:
 
 ```bash
-uv run pytest tests/test_baseline_backtest.py -v
+uv run pytest tests/integration/test_baseline_backtest.py -v
 ```
 
 Full suite:

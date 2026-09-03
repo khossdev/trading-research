@@ -68,8 +68,8 @@ def test_minimal_backtest(tmp_path: Path) -> None:
     instrument_id = InstrumentId.from_str("AAPL.XNAS")
 
     strategy = ImportableStrategyConfig(
-        strategy_path="tests.minimal_strategy:MinimalStrategy",
-        config_path="tests.minimal_strategy:MinimalStrategyConfig",
+        strategy_path="tests.fixtures.minimal_strategy:MinimalStrategy",
+        config_path="tests.fixtures.minimal_strategy:MinimalStrategyConfig",
         config={"bar_type": "AAPL.XNAS-1-MINUTE-LAST-EXTERNAL"},
     )
 

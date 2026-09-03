@@ -27,7 +27,7 @@ Fees / spread / slippage (unit-tested on synthetic trades)
   ↓
 net_pnl(trade, config)
   ↓
-evaluate_trades(trades, config) → EvaluationReport
+evaluate_net(trades, config) → NetEvaluationReport
   ↓
 Real baseline backtest (gross vs net)
 ```
@@ -36,13 +36,13 @@ Each cost component was validated independently before combination and NautilusT
 
 ### Execution costs module
 
-`tests/execution_costs.py` defines:
+`src/trading_research/execution/costs.py` defines:
 
 - `ExecutionCostConfig` with `fee_rate`, `spread`, and `slippage` (all non-negative)
 - `calculate_fee(price, quantity, fee_rate)`
 - `net_pnl(trade, config)` using effective entry/exit prices
-- `EvaluationReport` with gross/net P&L and cost decomposition
-- `evaluate_trades(trades, config)` for aggregate net metrics
+- `NetEvaluationReport` with gross/net P&L and cost decomposition
+- `evaluate_net(trades, config)` for aggregate net metrics
 
 Effective prices:
 
@@ -62,7 +62,7 @@ net_pnl       = gross_pnl - fees - spread_cost - slippage_cost
 
 Win/loss metrics in the net report (`win_count`, `average_win`, `average_loss`, `expectancy`) are computed from **net P&L per trade**, not gross.
 
-Gross evaluation (`backtest_metrics.evaluate_trades`) and net evaluation (`execution_costs.evaluate_trades`) remain separate layers.
+Gross evaluation (`evaluation.metrics.evaluate_gross`) and net evaluation (`execution.costs.evaluate_net`) remain separate layers.
 
 ### Cost model
 
@@ -129,12 +129,12 @@ net P&L       = +57.9
 
 ### Integration backtest
 
-`tests/test_baseline_backtest.py` reuses the Phase 4 pipeline and adds gross vs net assertions:
+`tests/integration/test_baseline_backtest.py` reuses the Phase 4 pipeline and adds gross vs net assertions:
 
 1. Run the baseline backtest on synthetic catalog data.
 2. Convert closed positions to `Trade` objects.
-3. Report gross metrics via `backtest_metrics.evaluate_trades()`.
-4. Apply `execution_costs.evaluate_trades()` with a cost configuration.
+3. Report gross metrics via `evaluate_gross()`.
+4. Apply `evaluate_net()` with a cost configuration.
 5. Assert gross and net outcomes match expected values.
 
 Reference scenario (same synthetic bars as Phase 4):
@@ -157,7 +157,7 @@ With `fee_rate = 0.001`, `spread = 2.0`, `slippage = 1.0`:
 
 Trade detail: entry `110` → exit `90` × `1`.
 
-Recorded results: [Phase 5 Results](phase-5-results.md).
+Recorded results: [Phase 5 Results](../results/phase-5-results.md).
 
 The backtest confirms:
 

@@ -1,4 +1,4 @@
-from tests.baseline_strategy import BaselineStrategy, BaselineStrategyConfig
+from trading_research.strategies.baseline import BaselineStrategy, BaselineStrategyConfig
 
 
 def test_baseline_sma_values() -> None:
